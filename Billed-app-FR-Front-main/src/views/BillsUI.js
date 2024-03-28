@@ -19,9 +19,14 @@ const row = (bill) => {
     `)
   }
 
-const rows = (data) => {
-  return (data && data.length) ? data.map(bill => row(bill)).join("") : ""
-}
+  const rows = (data) => {
+    // Trier les factures par date décroissante
+    const sortedBills = data.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    // Générer les lignes du tableau à partir des factures triées
+    return (sortedBills && sortedBills.length) ? sortedBills.map(bill => row(bill)).join("") : "";
+  }
+  
 
 export default ({ data: bills, loading, error }) => {
   

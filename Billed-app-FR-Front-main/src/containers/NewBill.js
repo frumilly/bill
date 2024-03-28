@@ -16,14 +16,32 @@ export default class NewBill {
     new Logout({ document, localStorage, onNavigate })
   }
   handleChangeFile = e => {
-    e.preventDefault()
-    const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
-    const filePath = e.target.value.split(/\\/g)
-    const fileName = filePath[filePath.length-1]
-    const formData = new FormData()
-    const email = JSON.parse(localStorage.getItem("user")).email
-    formData.append('file', file)
-    formData.append('email', email)
+    e.preventDefault();
+    const fileInput = document.querySelector(`input[data-testid="file"]`);
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        // Handle case where no file is selected
+        return;
+    }
+    
+    const filePath = fileInput.value.split(/\\/g);
+    const fileName = filePath[filePath.length - 1];
+    
+    // vérifier file extension
+    const allowedExtensions = ['jpg', 'jpeg', 'png'];
+    const fileExtension = fileName.split('.').pop().toLowerCase();
+    
+    if (!allowedExtensions.includes(fileExtension)) {
+        alert('Seuls les fichiers avec les extensions jpg, jpeg ou png sont autorisés.');
+        fileInput.value = '';
+        return;
+    }
+    
+    const formData = new FormData();
+    const email = JSON.parse(localStorage.getItem("user")).email;
+    formData.append('file', file);
+    formData.append('email', email);
 
     this.store
       .bills()
