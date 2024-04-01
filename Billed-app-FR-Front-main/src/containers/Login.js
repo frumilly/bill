@@ -36,6 +36,8 @@ export default class Login {
   handleSubmitAdmin = e => {
     console.log(e);
     e.preventDefault()
+    //const email = e.target.querySelector(`input[data-testid="admin-email-input"]`).value;
+    //const password = e.target.querySelector(`input[data-testid="admin-password-input"]`).value;
     const email = e.target.querySelector(`input[data-testid="admin-email-input"]`).value;
     const password = e.target.querySelector(`input[data-testid="admin-password-input"]`).value;
     console.log("Email:", email, "Password:", password);
