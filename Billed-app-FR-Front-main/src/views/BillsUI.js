@@ -20,6 +20,7 @@ const row = (bill) => {
   }
 
   const rows = (data) => {
+    //  [Bug report] - Bills
     // Trier les factures par date décroissante
     const sortedBills = data.sort((a, b) => new Date(b.date) - new Date(a.date));
     

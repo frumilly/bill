@@ -26,7 +26,8 @@ describe("Given I am connected as an employee", () => {
       await waitFor(() => screen.getByTestId('icon-window'))
       const windowIcon = screen.getByTestId('icon-window')
       //to-do write expect expression
-
+      // compare le résultat réel de l'exécution du code avec le résultat attendu et signale une erreur si les deux ne correspondent pas.
+      expect(windowIcon).toHaveClass('active-icon')
     })
     test("Then bills should be ordered from earliest to latest", () => {
       document.body.innerHTML = BillsUI({ data: bills })
@@ -38,3 +39,16 @@ describe("Given I am connected as an employee", () => {
     
   })
 })
+
+// test d'intégration GET Bills
+test("Integration test for GET Bills", async () => {
+
+  // When: Exécution de l'action ici je vais faire appel à la fonctionnalité GET Bills
+  const response = await fetch("/api/bills"); // Supposons que l'API pour récupérer les factures se trouve à l'URL /api/bills
+  const bills = await response.json(); 
+
+  // Then: ici Vérification du résultat
+  expect(response.status).toBe(200); // Vérifie que la réponse est réussie
+  expect(bills).toHaveLength(3); // Vérifie que trois factures sont retournées, par exemple (on peut choisir un autre cas)
+
+});

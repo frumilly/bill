@@ -8,6 +8,7 @@ import NewBill from "../containers/NewBill.js"
 
 describe("Given I am connected as an employee", () => {
   describe("When I am on NewBill Page", () => {
+    //test d'intégration POST new bill
     test("Then I can submit a new bill", () => {
       const html = NewBillUI()
       document.body.innerHTML = html
@@ -48,6 +49,7 @@ describe("Given I am connected as an employee", () => {
       fireEvent.submit(form)
       expect(handleSubmit).toHaveBeenCalled()
       expect(firestore.bills().create).toHaveBeenCalledWith({
+        //encapsuler les données du formulaire de manière appropriée avant de les envoyer au service Firestore pour la création de la facture
         data: expect.any(FormData),
         headers: {
           noContentType: true

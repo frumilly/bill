@@ -27,15 +27,16 @@ export default class NewBill {
     
     const filePath = fileInput.value.split(/\\/g);
     const fileName = filePath[filePath.length - 1];
-    
+    // [Bug Hunt] - Bills
     // vérifier file extension
     const allowedExtensions = ['jpg', 'jpeg', 'png'];
     const fileExtension = fileName.split('.').pop().toLowerCase();
     
     if (!allowedExtensions.includes(fileExtension)) {
-        alert('Seuls les fichiers avec les extensions jpg, jpeg ou png sont autorisés.');
+      fileInput.setCustomValidity('Mauvaise extension. Seuls les fichiers avec les extensions jpg, jpeg ou png sont autorisés.');
+      fileInput.reportValidity();
         fileInput.value = '';
-        return;
+        return false;
     }
     
     const formData = new FormData();

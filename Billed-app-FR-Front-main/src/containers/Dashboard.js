@@ -146,7 +146,10 @@ export default class {
     }
 
     bills.forEach(bill => {
-      $(`#open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills))
+      //suppression d'abord de tous les gestionnaires d'événements click attachés à l'élément avec l'ID #open-bill${bill.id} avant d'attacher le nouveau gestionnaire d'événements click.
+     // $(`#open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills))
+     $(`#open-bill${bill.id}`).off('click').click((e) => this.handleEditTicket(e, bill, bills));
+
     })
 
     return bills
