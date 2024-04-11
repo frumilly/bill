@@ -31,7 +31,7 @@ export default class NewBill {
     // vérifier file extension
     const allowedExtensions = ['jpg', 'jpeg', 'png'];
     const fileExtension = fileName.split('.').pop().toLowerCase();
-    
+    fileInput.setCustomValidity('');
     if (!allowedExtensions.includes(fileExtension)) {
       fileInput.setCustomValidity('Mauvaise extension. Seuls les fichiers avec les extensions jpg, jpeg ou png sont autorisés.');
       fileInput.reportValidity();
