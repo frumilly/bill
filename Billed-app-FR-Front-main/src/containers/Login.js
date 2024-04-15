@@ -36,7 +36,7 @@ export default class Login {
   handleSubmitAdmin = e => {
     console.log(e);
     e.preventDefault()
-    // [Bug report] - Login
+    // OFZ [Bug report] - Login
     //const email = e.target.querySelector(`input[data-testid="admin-email-input"]`).value;
     //const password = e.target.querySelector(`input[data-testid="admin-password-input"]`).value;
     const email = e.target.querySelector(`input[data-testid="admin-email-input"]`).value;

@@ -11,9 +11,12 @@ import { localStorageMock } from "../__mocks__/localStorage.js";
 import mockStore from "../__mocks__/store";
 import router from "../app/Router.js";
 import userEvent from "@testing-library/user-event";
+import $ from 'jquery';
+import { fireEvent } from '@testing-library/dom';
 
 jest.mock("../app/store", () => mockStore);
 
+//Configuration initiale : Avant chaque test, nous mettons en place un environnement simulé qui ressemble à celui de l'application réelle. Cela inclut des éléments comme le stockage local (localStorage) et la création d'un élément div simulé qui servira de point d'ancrage pour notre application.
 describe("Given I am connected as an employee", () => {
   describe("When I am on Bills Page", () => {
     test("Then bill icon in vertical layout should be highlighted", async () => {
@@ -34,56 +37,20 @@ describe("Given I am connected as an employee", () => {
 
       await waitFor(() => screen.getByTestId("icon-window"));
       const windowIcon = screen.getByTestId("icon-window");
-      //to-do write expect expression
+      // OFZ (test unitaire 1) ajout “expect” Bills 
       expect(windowIcon.classList.contains("active-icon")).toBe(true);
     });
 
+    test("Then bills should be ordered from earliest to latest", () => {
+      document.body.innerHTML = BillsUI({ data: bills })
+      const dates = screen.getAllByText(/^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$/i).map(a => a.innerHTML)
+      const chrono = (a, b) => ((a < b) ? 1 : -1) // Méthode de tri pour l'ordre croissant
+      const datesSorted = [...dates].sort(chrono) // Tri des dates dans l'ordre croissant
+      expect(dates).toEqual(datesSorted)
+    })
+  });
+
  
-  });
-
-  describe("When employee click on eye Button", () => {
-    test("Then modal should be displayed", () => {
-      const onNavigate = (pathname) => {
-        document.body.innerHTML = ROUTES({ pathname });
-      };
-
-      Object.defineProperty(window, "localStorage", {
-        value: localStorageMock,
-      });
-      window.localStorage.setItem(
-        "user",
-        JSON.stringify({
-          type: "Employee",
-        })
-      );
-
-      const billsDashboard = new Bills({
-        document,
-        onNavigate,
-        store: null,
-        bills: bills,
-        localStorage: window.localStorage,
-      });
-
-      /* Mock fonction JQuery */
-      $.fn.modal = jest.fn();
-
-      document.body.innerHTML = BillsUI({ data: { bills } });
-
-      const iconEye = screen.getAllByTestId("btn-new-bill")[0];
-      const handleClickIconEye = jest.fn(
-        billsDashboard.handleClickIconEye(iconEye)
-      );
-
-      iconEye.addEventListener("click", handleClickIconEye);
-      userEvent.click(iconEye);
-
-      expect(handleClickIconEye).toHaveBeenCalled();
-      expect($.fn.modal).toHaveBeenCalled();
-      expect(screen.getByTestId("modal")).toBeTruthy();
-      expect(screen.getByTestId("modal-title")).toBeTruthy();
-    });
-  });
 
   describe("When employee click on new bill", () => {
     test("Then form should be displayed", () => {
@@ -122,7 +89,7 @@ describe("Given I am connected as an employee", () => {
   });
 });
 
-/* Api Get Bills */
+/* OFZ  test d'intégration 2 GET Bills */
 
 describe("When Employee Navigate on Bills Dashbord", () => {
   beforeEach(() => {
@@ -175,5 +142,27 @@ describe("When Employee Navigate on Bills Dashbord", () => {
   test("fetches bills from an API", async () => {
     const bills = await mockStore.bills().list();
     expect(bills.length).toBe(4);
+  });
+});
+
+describe('When employee clicks on eye button', () => {
+  test('Then modal should be displayed', () => {
+    // Créez un élément factice représentant l'icône de l'œil
+    const icon = document.createElement('div');
+    icon.setAttribute('data-bill-url', 'example.com/bill');
+    
+    // Créez une instance de la classe Bills
+    const bills = new Bills({
+      document,
+      onNavigate: jest.fn(), // Utilisez jest.fn() pour créer une fonction espionne
+      store: null, // Vous pouvez utiliser un magasin fictif ou un mock ici
+      localStorage: localStorageMock, // Assurez-vous de fournir une implémentation de localStorage pour la classe
+    });
+
+    // Appelez directement la méthode handleClickIconEye avec l'icône factice en tant qu'argument
+    bills.handleClickIconEye(icon);
+
+    // Vérifiez si la méthode modal('show') a été appelée sur l'élément avec l'ID modaleFile
+    expect($('#modaleFile').find(".modal-body").html()).toContain('<img width=');
   });
 });

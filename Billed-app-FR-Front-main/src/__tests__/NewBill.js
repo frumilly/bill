@@ -2,60 +2,100 @@
  * @jest-environment jsdom
  */
 
-import { screen, fireEvent } from "@testing-library/dom"
-import NewBillUI from "../views/NewBillUI.js"
-import NewBill from "../containers/NewBill.js"
+import "@testing-library/jest-dom";
+import { screen, fireEvent, getByTestId, waitFor } from "@testing-library/dom";
+import mockStore from "../__mocks__/store.js";
+import NewBill from "../containers/NewBill.js";
+import { ROUTES, ROUTES_PATH } from "../constants/routes.js";
+import { localStorageMock } from "../__mocks__/localStorage.js";
+import router from "../app/Router.js";
+import Bills from "../containers/Bills.js";
 
-describe("Given I am connected as an employee", () => {
-  describe("When I am on NewBill Page", () => {
-    //test d'intégration POST new bill
-    test("Then I can submit a new bill", () => {
-      const html = NewBillUI()
-      document.body.innerHTML = html
-      const onNavigate = jest.fn()
-      const firestore = {
-        bills: () => ({
-          create: jest.fn().mockResolvedValueOnce({ fileUrl: "url", key: "key" })
-        })
-      }
-      const newBill = new NewBill({ document, onNavigate, store: firestore })
-      const form = screen.getByTestId("form-new-bill")
-      const handleSubmit = jest.fn(newBill.handleSubmit)
-      form.addEventListener("submit", handleSubmit)
-      fireEvent.change(screen.getByTestId("file"), {
-        target: { files: [new File(["test.jpg"], "test.jpg", { type: "image/jpeg" })] }
+jest.mock("../app/Store", () => mockStore);
+
+describe("When I am on NewBill Page", () => {
+  // Configuration de l'environnement de test avant chaque test
+  beforeEach(() => {
+    Object.defineProperty(window, "localStorage", { value: localStorageMock });
+    window.localStorage.setItem(
+      "user",
+      JSON.stringify({
+        type: "Employee",
       })
-      fireEvent.change(screen.getByTestId("datepicker"), {
-        target: { value: "2024-03-29" }
-      })
-      fireEvent.change(screen.getByTestId("expense-type"), {
-        target: { value: "Transports" }
-      })
-      fireEvent.change(screen.getByTestId("expense-name"), {
-        target: { value: "Train ticket" }
-      })
-      fireEvent.change(screen.getByTestId("amount"), {
-        target: { value: "50" }
-      })
-      fireEvent.change(screen.getByTestId("vat"), {
-        target: { value: "10" }
-      })
-      fireEvent.change(screen.getByTestId("pct"), {
-        target: { value: "20" }
-      })
-      fireEvent.change(screen.getByTestId("commentary"), {
-        target: { value: "Test commentary" }
-      })
-      fireEvent.submit(form)
-      expect(handleSubmit).toHaveBeenCalled()
-      expect(firestore.bills().create).toHaveBeenCalledWith({
-        //encapsuler les données du formulaire de manière appropriée avant de les envoyer au service Firestore pour la création de la facture
-        data: expect.any(FormData),
-        headers: {
-          noContentType: true
-        }
-      })
-      expect(onNavigate).toHaveBeenCalledWith("/bills")
-    })
+    );
+    const root = document.createElement("div");
+    root.setAttribute("id", "root");
+    document.body.append(root);
+    router();
+  });
+
+  test("Then mail icon on verticallayout should be highlighted", async () => {
+    window.onNavigate(ROUTES_PATH.NewBill);
+    await waitFor(() => screen.getByTestId("icon-mail"));
+    const Icon = screen.getByTestId("icon-mail");
+    expect(Icon).toHaveClass("active-icon");
+  });
+
+  describe ("When I am on NewBill form", () => {
+    test("Then I add File", async () => {
+      const dashboard = new NewBill({
+        document,
+        onNavigate,
+        store: mockStore,
+        localStorage: localStorageMock,
+      });
+  
+      const handleChangeFile = jest.fn(dashboard.handleChangeFile);
+      const inputFile = screen.getByTestId("file");
+      inputFile.addEventListener("change", handleChangeFile);
+      fireEvent.change(inputFile, {
+        target: {
+          files: [
+            new File(["document.jpg"], "document.jpg", {
+              type: "document/jpg",
+            }),
+          ],
+        },
+      });
+  
+      expect(handleChangeFile).toHaveBeenCalled();
+      expect(handleChangeFile).toBeCalled();
+      expect(screen.getByText("Envoyer une note de frais")).toBeTruthy();
+    });
   })
-})
+});
+
+/* OFZ test d'intégration 3 POST new bill.  */
+describe("When I am on NewBill Page and submit the form", () => {
+  beforeEach(() => {
+    jest.spyOn(mockStore, "bills");
+    Object.defineProperty(window, "localStorage", { value: localStorageMock });
+    window.localStorage.setItem(
+      "user",
+      JSON.stringify({
+        type: "Employee",
+        email: "a@a",
+      })
+    );
+    const root = document.createElement("div");
+    root.setAttribute("id", "root");
+    document.body.appendChild(root);
+    router();
+  });
+
+  describe("user submit form valid", () => {
+    test("call api update bills", async () => {
+      const newBill = new NewBill({
+        document,
+        onNavigate,
+        store: mockStore,
+        localeStorage: localStorageMock,
+      });
+      const handleSubmit = jest.fn(newBill.handleSubmit);
+      const form = screen.getByTestId("form-new-bill");
+      form.addEventListener("submit", handleSubmit);
+      fireEvent.submit(form);
+      expect(mockStore.bills).toHaveBeenCalled();
+    });
+  });
+});

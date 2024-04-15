@@ -20,12 +20,17 @@ const row = (bill) => {
   }
 
   const rows = (data) => {
-    //  [Bug report] - Bills
+    // OFZ [Bug report] - Bills
     // Trier les factures par date décroissante
-    const sortedBills = data.sort((a, b) => new Date(b.date) - new Date(a.date));
+    if (Array.isArray(data)) {
+      const sortedBills = data.sort((a, b) => new Date(b.date) - new Date(a.date));
+      return (sortedBills && sortedBills.length) ? sortedBills.map(bill => row(bill)).join("") : "";
+    } else {
+      // Gérer le cas où data n'est pas un tableau
+      console.error("data is not an array");
+      return ""; // Ou toute autre logique de gestion d'erreur appropriée
+    }
     
-    // Générer les lignes du tableau à partir des factures triées
-    return (sortedBills && sortedBills.length) ? sortedBills.map(bill => row(bill)).join("") : "";
   }
   
 

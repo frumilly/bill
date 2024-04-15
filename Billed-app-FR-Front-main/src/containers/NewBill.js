@@ -27,7 +27,7 @@ export default class NewBill {
     
     const filePath = fileInput.value.split(/\\/g);
     const fileName = filePath[filePath.length - 1];
-    // [Bug Hunt] - Bills
+    // OFZ [Bug Hunt] - Bills
     // vérifier file extension
     const allowedExtensions = ['jpg', 'jpeg', 'png'];
     const fileExtension = fileName.split('.').pop().toLowerCase();
