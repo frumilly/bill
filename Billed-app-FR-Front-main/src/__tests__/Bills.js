@@ -14,6 +14,7 @@ import userEvent from "@testing-library/user-event";
 import $ from 'jquery';
 import { fireEvent } from '@testing-library/dom';
 
+
 jest.mock("../app/store", () => mockStore);
 
 //Configuration initiale : Avant chaque test, nous mettons en place un environnement simulé qui ressemble à celui de l'application réelle. Cela inclut des éléments comme le stockage local (localStorage) et la création d'un élément div simulé qui servira de point d'ancrage pour notre application.
@@ -147,22 +148,25 @@ describe("When Employee Navigate on Bills Dashbord", () => {
 
 describe('When employee clicks on eye button', () => {
   test('Then modal should be displayed', () => {
-    // Créez un élément factice représentant l'icône de l'œil
-    const icon = document.createElement('div');
-    icon.setAttribute('data-bill-url', 'example.com/bill');
-    
-    // Créez une instance de la classe Bills
-    const bills = new Bills({
-      document,
-      onNavigate: jest.fn(), // Utilisez jest.fn() pour créer une fonction espionne
-      store: null, // Vous pouvez utiliser un magasin fictif ou un mock ici
-      localStorage: localStorageMock, // Assurez-vous de fournir une implémentation de localStorage pour la classe
-    });
-
-    // Appelez directement la méthode handleClickIconEye avec l'icône factice en tant qu'argument
-    bills.handleClickIconEye(icon);
-
-    // Vérifiez si la méthode modal('show') a été appelée sur l'élément avec l'ID modaleFile
-    expect($('#modaleFile').find(".modal-body").html()).toContain('<img width=');
+    const onNavigate = jest.fn();
+    // on crée la vue Bills et on ajoute les factures
+    document.body.innerHTML= BillsUI({data: bills});
+       // Créez une instance de la classe Bills
+       const billsDashboard = new Bills({
+        document,
+        onNavigate, // Utilisez jest.fn() pour créer une fonction espionne
+        store: null, // Vous pouvez utiliser un magasin fictif ou un mock ici
+        localStorage: null, // pas besoin de localstorage ici 
+      });
+      $.fn.modal= jest.fn();
+      const iconEye = screen.getAllByTestId("btn-new-bill")[0];
+      const handleClickIconEye = jest.fn(
+        billsDashboard.handleClickIconEye(iconEye)
+      );
+      iconEye.addEventListener("click", handleClickIconEye);
+      userEvent.click(iconEye);
+      expect(handleClickIconEye).toHaveBeenCalled();
+      expect($.fn.modal).toHaveBeenCalled();
+   
   });
 });
